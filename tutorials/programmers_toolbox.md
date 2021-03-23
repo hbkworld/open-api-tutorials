@@ -20,7 +20,9 @@ For an example of this, open the homepage of the LAN-XI module and click *Open r
 
 ![Running Notar side-by-side with an Open API application](../images/multi_client_support.gif)
 
-Another example would be to have a software application prepare the module for a measurement, and then prompt the user to press the Control button on the module to start measuring. To prevent accidentally starting and stopping a measurement, it is also possible to disable the Control button.
+Another example would be to have a software application prepare the module for a measurement, and then prompt the user to press the Control button on the module to start measuring.
+
+To prevent accidentally starting and stopping a measurement, it is also possible to disable the Control button programmatically.
 
 ## Transducer Detection and Setup
 
@@ -29,40 +31,42 @@ Open API automatically performs TEDS transducer detection on start-up.
 This may be undesirable for a number of reasons:
 
 * it can be difficult to determine when the detection process starts and finishes
-* it prolongs the time required to set up new a measurement from scratch
-* the transducer configuration may already be known, and/or none of the connected transducers support TEDS
+* it prolongs the time required to set up a new measurement from scratch
+* the transducer configuration may already be known
+* none of the used transducers supports TEDS
+* a generator output or other external control signal is looped back to an input channel, and TEDS detection would interfere with this signal
 
-In those cases, it is possible to instruct Open API to skip automatic detection when the recorder is opened:
+It is possible to instruct Open API to skip automatic detection when the recorder is opened:
 
 ```python
-base_url = "http://<ip>"
+base_url = "http://<ip>/rest/rec"
 
-requests.put(base_url + "/rest/rec/open", json={"performTransducerDetection": False})
+requests.put(base_url + "/open", json={"performTransducerDetection": False})
 ```
 
 Transducer detection can be performed on-demand as follows:
 
 ```python
-base_url = "http://<ip>"
+base_url = "http://<ip>/rest/rec"
 
 # Start TEDS transducer detection
-requests.post(base_url + "/rest/rec/channels/input/all/transducers/detect")
+requests.post(base_url + "/channels/input/all/transducers/detect")
 
 # Wait for transducer detection to complete
 prev_tag = 0
 while True:
-    response = requests.get(base_url + "/rest/rec/onchange?last=" + str(prev_tag)).json()
+    response = requests.get(base_url + "/onchange?last=" + str(prev_tag)).json()
     prev_tag = response["lastUpdateTag"]
     if not response["transducerDetectionActive"]:
         break
 
 # Get the result of the detection
-transducers = requests.get(base_url + "/rest/rec/channels/input/all/transducers").json()
+transducers = requests.get(base_url + "/channels/input/all/transducers").json()
 ```
 
 The returned result of the detection includes the fields `requiresCcld` and `requires200V`, which can be used to configure the front-end e.g. to enable the [CCLD](https://www.bksv.com/en/transducers/signal-conditioning/ccld) supply.
 
-However, be aware that those values while mostly accurate are nothing more than best guesses. They are based on a transducer database embedded in the module firmware, combined with heuristics to determine the requirements of the transducer in question; in other words, they are merely suggestions and should be overridden by the end-user if needed.
+However, be aware that those values, while accurate in most cases, are nothing more than best guesses. They are based on a transducer database embedded in the module firmware, combined with heuristics to determine the requirements of the transducer in question; in other words, they are merely suggestions and should be overridden by the end-user if needed.
 
 Also note that the use of polarisation voltage requires a front-panel with LEMO connectors such as the [UA-2101-060](https://www.bksv.com/en/instruments/daq-data-acquisition/lan-xi-daq-system/frontpanels/ua-2101).
 
@@ -80,9 +84,9 @@ For PTP-synchronized, multi-module measurements the modules will obtain the time
 
 ## Front-panel LED's
 
-The Status LED immediately below the module display turns red if an error occurs during a measurement, such as data loss due to a bad network connection, or the SD card filling up. Overload and other signal-related errors are reported through the circular LED's-
+The Status LED immediately below the module display turns red if an error occurs during a measurement, such as data loss due to a bad network connection, or the SD card filling up.
 
-The circular LED on each channel is used to indicate a variety of information:
+The circular LED's on the connectors are used to indicate various conditions relating to each individual channel:
 
 Colour | Meaning
 --- | ---
@@ -136,9 +140,9 @@ Software can use this to present end-users with a list of options, or automatica
 To request information about the module, execute
 
 ```python
-base_url = "http://<ip>"
+base_url = "http://<ip>/rest/rec"
 
-requests.put(base_url + "/rest/rec/module/info")
+requests.put(base_url + "/module/info")
 ```
 
 The response includes:
@@ -153,38 +157,38 @@ The response includes:
 
 ## Module States
 
-The module *state* determines the type of API requests that can be made.
+The module *state* determines the type of API requests that can be made at any given time.
 
-Most of the time the programmer won't need to think about this, but you may run into the odd error (typically HTTP status 403) while experimenting with the API.
+Most of the time the programmer won't need to worry about this, but you may run into the odd error (typically HTTP status 403) while experimenting with the API.
 
 In many cases the reason for the error is obvious, such as attempting to perform transducer detection while a measurement is in progress.
 
-For documentation on this please refer to our [reference documentation](https://github.com/hbk-world/LAN-XI-FW/blob/master/Open%20APIv17draft.pdf), which lists each API request along with the permissible module states.
+For more information refer to our [reference documentation](https://github.com/hbk-world/LAN-XI-FW/blob/master/Open%20APIv17draft.pdf), which lists each API request along with the permissible module states.
 
 ## Measurement Limitations
 
-Currently, the `bandwidth` and `destinations` values on each channel must be the same.
+Currently, the `bandwidth` and `destinations` settings on each channel must be the same.
 
 For example, it is not possible to configure channel 1 to measure at 51.2 kHz bandwidth, and channel 2 at 25.6 kHz bandwidth.
 
-Similarly, all channels must be either streamed (`destinations = [ "socket" ]`) or stored on SD card (`destinations = [ "sd" ]`), the protocol does not support streaming some channels and storing others on SD card.
+Similarly, all channels must be either streamed (`destinations = [ "socket" ]`) or stored on SD card (`destinations = [ "sd" ]`). Open API does not support streaming some channels while simultaneously storing other channels on SD card.
 
 Finally, only one destination can be selected at a time. The modules are unable to both stream and store acquired data at the same time.
 
 ## Error Handling
 
-The code examples omit error handling in the interest of clarity.
+The code examples in this repository omit error handling in the interest of clarity.
 
 In a production environment, the HTTP status code should be checked after all requests.
 
-A status code in the 4xx range indicates a client error, while a status code of 5xx means there was an error on the server. The module will include an error message in the response body.
+A status code in the 4xx range indicates a client error, while a status code of 5xx means there was an error on the module. The module will include an error message in the response body.
 
 A 5xx status may have left the module in an unstable state. The recommended action after a 5xx error is to reboot the module by executing
 
 ```python
-base_url = "http://<ip>"
+base_url = "http://<ip>/rest/rec"
 
-requests.put(base_url + "/rest/rec/reboot")
+requests.put(base_url + "/reboot")
 ```
 
 HBK appreciates reports of 5xx errors, if possible with a sample program or description of events leading up to the error.

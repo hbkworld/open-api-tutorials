@@ -205,11 +205,9 @@ In the `open` request, we pass a parameter to disable automatic TEDS transducer 
 
 The next step is to configure the measurement. This is where we select the input channels to include, the desired bandwidth, filter settings, conditioning setup, etc.
 
-To simplify the configuration task, clients can request a default setup, make modifications to the setup, and submit it back to the module.
+To simplify the configuration task, clients can request a *default setup*, make modifications to the setup, and submit it back to the module. Using the default setup as a starting point saves client software from having to build a setup structure from scratch. The default setup always enables all input channels and selects the highest supported bandwidth.
 
-Using the default setup as a starting point saves client software from having to build a setup structure from scratch. The default setup always enables all input channels and selects the highest supported bandwidth.
-
-In our case, we set the `destination` on each channel to request that data be streamed rather than recorded to an SD card in the module.
+In our case, we set the `destination` on each channel to request that data be streamed on the network rather than recorded to an SD card in the module.
 
 Also, if any transducers were detected, we attach the transducer information to the input channel, and configure CCLD and polarisation voltage based on the data returned by the API. Note that the `requiresCcld` and `requires200V` fields associated with each detected transducer are only suggestions. See [Transducer Detection and Setup](programmers_toolbox.md) for more information.
 
@@ -239,6 +237,6 @@ This may be useful e.g. to stream a 'monitor' channel directly to a software app
 
 To configure a module to use multi-socket streaming, change the example code as follows:
 
-* Select the 'multi-socket' destination on all channels
-* Request a list of TCP port number to connect to. The first port number in the returned list will contain data from the first enabled channel, and so on
+* Set the `destination` on all enabled channels to `multi-socket`
+* Make a `GET` request to `/rest/rec/destination/sockets`to obtain a list of TCP port numbers to connect to. The response will be a JSON array of port numbers. The first port number in the array will contain data from the first enabled channel, and so on
 * Set up connections to each TCP port before starting the measurement
