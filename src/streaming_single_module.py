@@ -27,6 +27,8 @@ def get_measurement_errors(cs):
     err = []
     for i, sts in enumerate(cs):
         s, prefix = "", f"Channel {i+1}: "
+        if sts is None:
+            continue
         if sts["anol"] != "none":
             s = s + prefix + f'Analog Overload ({sts["anol"]})'
             prefix = ", "
