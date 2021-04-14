@@ -66,6 +66,8 @@ def get_quality_strings(l):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("file", help="File containing Open API streaming data")
+parser.add_argument("-s", "--save-plot", dest="save_plot", action='store_true', \
+    help="Save plot to file")
 args = parser.parse_args()
 
 print(f'Reading streaming data from file "{args.file}"...')
@@ -155,4 +157,9 @@ for index, (key, value) in enumerate(data.items()):
 plt.setp(axis[-1, 0], xlabel='Time [s]')
 plt.setp(axis[-1, 1], xlabel='Frequency [Hz]')
 
-plt.show()
+if args.save_plot:
+    plotname = path.splitext(args.file)[0] + ".png"
+    plt.savefig(plotname, dpi = 500)
+    print(f'Plot saved as {plotname}')
+else:
+    plt.show()
