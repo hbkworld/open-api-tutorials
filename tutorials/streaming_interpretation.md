@@ -294,6 +294,8 @@ We iterate through the collection, processing one signal at a time.
 
 The samples are raw, 24-bit values that must be scaled to produce meaningful results. We divide each sample by 2^23 to normalise to a range of [-1..1], and then multiply by the scale factor from the Interpretation message. The scale factor is calculated by the module and depends on the transducer sensitivity as well as the input range configured on the channel.
 
+An important point to note is that if the transducer sensitivity is not known to the module then the scale factor must be calculated manually. Refer to the [Toolbox page](programmers_toolbox.md) for details on this.
+
 We then calculate FFT spectra of the data, with a special case for microphones (indicated by an engineering unit of pascal).
 
 Time- and frequency domain data is then plotted on a grid.

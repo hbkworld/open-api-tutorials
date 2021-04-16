@@ -155,6 +155,26 @@ The response includes:
 * information on the mounted front panel
 * firmware and hardware version numbers
 
+## The Scale Factor
+
+Sample data contained in Signal Data messages is normalized in signed 24-bit two’s complement format, sometimes referred to as [Q23](https://en.wikipedia.org/wiki/Q_%28number_format%29).
+
+This means that the data needs to be converted in order to produce meaningful values. LAN-XI makes this easy by providing a *scale factor* that can be multiplied onto each sample:
+
+    calibrated_value = sample_value * scale_factor
+
+If the transducer sensitivity is not known to the module at the time of measurement then the scale factor must be calculated manually. This may be the case if the transducers that are used are not TEDS-capable, and the sensitivity was not provided manually when performing the measurement (in the `setup` structure submitted to `/rest/rec/channels/input` - see the [Streaming tutorial](streaming_single_module.md)).
+
+The scale factor is calculated as:
+
+    scale_factor = input_range × headroom / transducer_sensitivity
+
+where the headroom is 1.5 dB, i.e. 10^(1.5/20) or about 1.18850.
+
+As an example, assume that the input range on the LAN-XI module is set to 10 V, and we're using a microphone with a sensitivity of 10 mV / Pa. The resulting scale factor would then be:
+
+    scale_factor = 10 V × 1.18850 / ( 0.01 V / Pa ) = 1188.5 Pa
+
 ## Module States
 
 The module *state* determines the type of API requests that can be made at any given time.
