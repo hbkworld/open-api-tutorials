@@ -123,9 +123,72 @@ Note that on Microsoft Windows, `%` is a special character and requires escaping
 >python.exe ./streaming_single_module.py fe80::280:daff:fe00:8db0%%33
 ```
 
-## mDNS/Bonjour
+## Finding Modules on the Network
+
+LAN-XI modules support two protocols that enable client software to discover available hardware: mDNS and IdaArp.
+
+### mDNS/Bonjour
+
+mDNS is a standard protocol that is widely supported by a number of software libraries and operating systems.
 
 LAN-XI modules respond to mDNS requests for `_http._tcp` services.
+
+Many devices support `_http._tcp`, so usually you will need to filter on the service name as well. For LAN-XI, the service name follows the pattern *BK&lt;type-number&gt;-&lt;serial-number&gt;*.
+
+This code sample scans the network for LAN-XI modules.
+
+It requires the `requests` and `zeroconf` packages to be installed, i.e. `pip3 install requests zeroconf`.
+
+```python
+#!/usr/bin/env python3
+
+"""Example code to demonstrate mDNS browsing for LAN-XI modules on the network."""
+
+import re
+import socket
+import time
+import requests
+from zeroconf import ServiceBrowser, Zeroconf
+
+class ModuleListener:
+
+    def remove_service(self, zeroconf, service_type, service_name):
+        pass
+
+    def add_service(self, zeroconf, service_type, service_name):
+        # Check if the mDNS service name matches that of a LAN-XI module
+        regex = re.compile(r'^BK\d{4}-\d{6}')
+        if regex.search(service_name) is not None:
+
+            # This looks like a LAN-XI module; get its IP address
+            service_info = zeroconf.get_service_info(service_type, service_name)
+            addr = socket.inet_ntoa(service_info.addresses[0])
+
+            # Request and print information about the module
+            url = f'http://{addr}/rest/rec/module/info'
+            module = requests.get(url).json()["module"]
+
+            print(f'{module["type"]["number"]} module s/n {module["serial"]} at IP address {addr}')
+
+zeroconf = Zeroconf()
+listener = ModuleListener()
+
+print(f'Browsing for LAN-XI modules...')
+ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
+
+time.sleep(15)
+zeroconf.close()
+```
+
+Example output:
+
+![Using mDNS to scan for LAN-XI modules](../images/mdns-scan.png)
+
+### IdaArp
+
+IdaArp is a custom discovery protocol that also supports other functionality such as rebooting modules or changing their IP addresses.
+
+[Sample code in C# and Objective-C](https://github.com/hbk-world/LAN-XI-Open-API-Examples/tree/master/IdaArp) is available on GitHub.
 
 ## Other Network Protocols
 
