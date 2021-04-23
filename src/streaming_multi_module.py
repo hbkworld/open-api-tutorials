@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# pylint: disable=C0103
+# pylint: disable=C0103,W0621
 
 """Example code to demonstrate multi-module streaming with the LAN-XI Open API."""
 
@@ -43,22 +43,57 @@ def get_measurement_errors(cs):
             err.append(s)
     return err
 
+def setup_module(m):
+    """Given a module structure 'm', performs TEDS transducer detection
+       and configures the module with default measurement settings."""
+    # Start TEDS transducer detection
+    requests.post(m["base_url"] + "/channels/input/all/transducers/detect")
+    # Wait for transducer detection to complete
+    prev_tag = 0
+    while True:
+        response = requests.get(m["base_url"] + "/onchange?last=" + str(prev_tag)).json()
+        prev_tag = response["lastUpdateTag"]
+        if not response["transducerDetectionActive"]:
+            break
+    # Get the result of the detection
+    transducers = requests.get(m["base_url"] + "/channels/input/all/transducers").json()
+    # Get the default measurement setup
+    m["setup"] = requests.get(m["base_url"] + "/channels/input/default").json()
+    # Configure front-end based on the result of transducer detection
+    for idx, t in enumerate(transducers):
+        if t is not None:
+            # A transducer was found on this channel
+            m["setup"]["channels"][idx]["transducer"] = t
+            m["setup"]["channels"][idx]["ccld"] = t["requiresCcld"]
+            m["setup"]["channels"][idx]["polvolt"] = t["requires200V"]
+            print(f'Module {m["number"]} Channel {idx+1}: '
+                  f'{t["type"]["number"] + " s/n " + str(t["serialNumber"])}, '
+                  f'CCLD {"On" if t["requiresCcld"] == 1 else "Off"}, '
+                  f'Polarization Voltage {"on" if t["requires200V"] == 1 else "off"}')
+    # Submit measurement setup to module
+    requests.put(m["base_url"] + "/channels/input", json=m["setup"])
+
 def await_state(description, modules, name, state, timeout=30):
+    """Given a list of 'modules', waits for each module to enter the specified state."""
     prev_remaining = len(modules)
-    print(f'Waiting for {prev_remaining} modules to {description}...')
+    print(f'Waiting for {prev_remaining} module(s) to {description}...')
     start = time.time()
     while time.time() - start < timeout:
         for m in modules:
             if name not in m or m[name] != state:
+                # Get the current state from the module
                 m[name] = requests.get(m["base_url"] + "/onchange").json()[name]
+        # How many modules are we still waiting for?
         remaining = sum(1 for x in modules if x[name] != state)
         if remaining == 0:
+            # All modules have entered the expected state.
             print("Done")
             return
         if remaining != prev_remaining:
             print(f'Waiting for {remaining} module(s) to {description}...')
             prev_remaining = remaining
         time.sleep(1)
+    # Not all modules entered the expected state before the timeout.
     sys.exit(f'Some modules did not {description}')
 
 parser = argparse.ArgumentParser()
@@ -75,11 +110,13 @@ args = parser.parse_args()
 if len(args.addrs) < 2:
     parser.error("at least two IP addresses must be provided")
 
-# Generate base URLs; IPv6 addresses in URL's must be enclosed in square brackets
+# Process IP addresses and generate base URLs for all modules
 modules = []
 for idx, addr in enumerate(args.addrs):
-    ip_addr = addr.split("%")[0] # Remove IPv6 zone index, if specified
+    # Remove IPv6 zone index, if specified
+    ip_addr = addr.split("%")[0]
     addr_family = socket.getaddrinfo(ip_addr, port=0)[0][0]
+    # IPv6 addresses in URL's must be enclosed in square brackets
     base_url = "http://[" + addr + "]" if addr_family == socket.AF_INET6 else "http://" + addr
     base_url = base_url + "/rest/rec"
     modules.append({"addr": addr.replace("%%", "%"), "base_url": base_url, "number": idx + 1})
@@ -87,21 +124,7 @@ for idx, addr in enumerate(args.addrs):
 addr_list = ", ".join(map(lambda m: m["addr"], modules))
 print(f'Creating {args.time}-second measurement "{args.name}" on modules at {addr_list}')
 
-# Optional: switch modules back to stand-alone synchronization
-for m in modules:
-    sync_params = {"synchronization": {"mode": "stand-alone"}}
-    requests.put(m["base_url"] + "/syncmode", json=sync_params)
-
-# We are going to configure the modules to use PTP synchronization.
-# However, before doing that we'll briefly change the time to five minutes before now.
-# This will cause the PTP algorithm on the modules to go through a step change and
-# make the modules lock onto the new time faster.
-# TODO does this make any difference?
-earlier = (time.time() - 300) * 1000
-for m in modules:
-    requests.put(m["base_url"] + "/module/time", data=str(earlier))
-
-print("Configure modules to use PTP synchronization")
+print("Configuring modules to use PTP synchronization")
 master = modules[0]
 now = time.time() * 1000
 sync_params = {"synchronization": \
@@ -113,7 +136,7 @@ for m in modules:
 await_state("lock onto PTP", modules, "ptpStatus", "Locked", timeout=600)
 
 # Reverse the list of modules so the master is last.
-# That will make it easier to make the remaining REST requests in the right order.
+# This will make it easier to make the remaining requests in the right order.
 modules.reverse()
 
 open_params = {"singleModule": False, "performTransducerDetection": False}
@@ -125,15 +148,13 @@ await_state("start sampling", modules, "inputStatus", "Sampling")
 for m in modules:
     requests.put(m["base_url"] + "/create")
 
-# Get the default measurement setup
-print(f'Sending measurement setup to modules')
+print("Detecting transducers and setting up measurement...")
 for m in modules:
-    m["setup"] = requests.get(m["base_url"] + "/channels/input/default").json()
-    # TODO transducer detection?
-    requests.put(m["base_url"] + "/channels/input", json=m["setup"])
+    setup_module(m)
 
 await_state("settle", modules, "inputStatus", "Settled")
 
+# Synchronize sample clocks across all modules
 for m in modules:
     requests.put(m["base_url"] + "/synchronize")
 
@@ -147,6 +168,8 @@ await_state("start streaming", modules, "inputStatus", "Streaming")
 # We'll use a Python selector to manage socket I/O
 selector = selectors.DefaultSelector()
 
+# For each module, create a file to store streaming data.
+# Then connect to each module, and associate each module's data file with the connection.
 for m in modules:
     # Store streamed data to this file
     m["stream_filename"] = args.name + "." + str(m["number"]) + ".stream"
@@ -162,10 +185,11 @@ for m in modules:
     # Register socket and file with selector
     selector.register(m["stream_sock"], selectors.EVENT_READ, m["stream_file"])
 
-# Start thread to receive data
+# Start thread to receive data from all modules
 thread = threading.Thread(target=receive_thread, args=(selector, ))
 thread.start()
 
+# Start measurement
 for m in modules:
     requests.post(m["base_url"] + "/measurements")
 
@@ -185,15 +209,16 @@ while time.time() - start < args.time:
             response = requests.get(m["base_url"] + "/onchange").json()
             errors = get_measurement_errors(response["recordingStatus"]["channelStatus"])
             if len(errors) > 0:
-                print(f'  Module {m["number"]}: {errors}')
+                print(f'  Module {m["number"]} {", ".join(errors)}')
 
+# Stop measurement
 for m in modules:
     requests.put(m["base_url"] + "/measurements/stop")
 
 print("Measurement stopped")
 
+# Close the streaming connections, data files, and recorder instances on eacn module
 for m in modules:
-    # Close the streaming connection, data file, and recorder
     m["stream_sock"].close()
     m["stream_file"].close()
     requests.put(m["base_url"] + "/finish")
