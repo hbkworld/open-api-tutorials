@@ -12,11 +12,11 @@ Windows users may need to follow the guidelines from Microsoft on [how to instal
 
 ## Multi-Client Support
 
-Open API supports multiple controlling client applications at any time, including Notar and the module button/display.
+Open API supports multiple controlling client applications at any time, including the LAN-XI Notar recorder application and the module button/display.
 
-For instance, the Notar recorder application could be used to monitor measurements carried out by a separate software application.
+For instance, LAN-XI Notar could be used to monitor measurements carried out by a separate software application.
 
-For an example of this, open the homepage of the LAN-XI module and click *Open recorder application*. Then run one of the example applications, such as the [streaming sample](streaming_single_module.md), and watch how Notar shows the elapsed time and signal levels while the measurement is ongoing:
+For an example of this, open the home page of the LAN-XI module and click *Open recorder application*. Then run one of the example applications, such as the [streaming sample](streaming_single_module.md), and watch how Notar shows the elapsed time and signal levels while the measurement is ongoing:
 
 ![Running Notar side-by-side with an Open API application](../images/multi_client_support.gif)
 
@@ -44,7 +44,7 @@ base_url = "http://<ip>/rest/rec"
 requests.put(base_url + "/open", json={"performTransducerDetection": False})
 ```
 
-Transducer detection can be performed on-demand as follows:
+Transducer detection can be performed on demand as follows:
 
 ```python
 base_url = "http://<ip>/rest/rec"
@@ -64,11 +64,11 @@ while True:
 transducers = requests.get(base_url + "/channels/input/all/transducers").json()
 ```
 
-The returned result of the detection includes the fields `requiresCcld` and `requires200V`, which can be used to configure the front-end e.g. to enable the [CCLD](https://www.bksv.com/en/transducers/signal-conditioning/ccld) supply.
+The returned result of the detection includes the fields `requiresCcld` and `requires200V`, which can be used to configure the front end e.g. to enable the [CCLD](https://www.bksv.com/en/transducers/signal-conditioning/ccld) supply.
 
-However, be aware that those values, while accurate in most cases, are nothing more than best guesses. They are based on a transducer database embedded in the module firmware, combined with heuristics to determine the requirements of the transducer in question; in other words, they are merely suggestions and should be overridden by the end-user if needed.
+However, be aware that those values, while accurate in most cases, are nothing more than best guesses. They are based on a transducer database embedded in the module firmware, combined with heuristics to determine the requirements of the transducer in question; in other words, they are merely suggestions and should be overridden by the end user if needed.
 
-Also note that the use of polarisation voltage requires a front-panel with LEMO connectors such as the [UA-2101-060](https://www.bksv.com/en/instruments/daq-data-acquisition/lan-xi-daq-system/frontpanels/ua-2101).
+Also note that the use of polarisation voltage requires a front panel with LEMO connectors such as [Front Panel UA-2101](https://www.bksv.com/en/instruments/daq-data-acquisition/lan-xi-daq-system/frontpanels/ua-2101).
 
 Not all transducers support TEDS. It is possible to manually add transducer information including the transducer type, serial number, sensitivity and engineering unit to the measurement setup.
 
@@ -86,7 +86,7 @@ For PTP-synchronized, multi-module measurements the modules will obtain the time
 
 The Status LED immediately below the module display turns red if an error occurs during a measurement, such as data loss due to a bad network connection, or the SD card filling up.
 
-The circular LED's on the connectors are used to indicate various conditions relating to each individual channel:
+The circular LEDs on the connectors are used to indicate various conditions relating to each individual channel:
 
 Colour | Meaning
 --- | ---
@@ -103,7 +103,7 @@ Open API supports IPv6 for the HTTP-based protocol, but not for streaming at the
 
 IPv6 will be supported in a future firmware release, and the code samples in this repository will work with IPv6 without any modifications.
 
-The module's IPv6 addresses are shown on the module's homepage; click *Network* and look under the *IPv6* heading.
+The module's IPv6 addresses are shown on the module's home page; click *Network* and look under the *IPv6* heading.
 
 All LAN-XI modules have a link-local IPv6 address, identified by the prefix `fe80::/10`.
 
@@ -198,7 +198,7 @@ LAN-XI currently does not support HTTPS, WebSocket or IPsec.
 
 It is often useful to query the capabilities of a module in terms of bandwidth, available channels, filters, etc.
 
-Software can use this to present end-users with a list of options, or automatically select settings to suit the measurement task.
+Software can use this to present end users with a list of options, or automatically select settings to suit the measurement task.
 
 To request information about the module, execute
 
@@ -210,7 +210,7 @@ requests.put(base_url + "/module/info")
 
 The response includes:
 
-* the number of input- and output channels
+* the number of input and output channels
 * available sample rates (divide by 2.56 to obtain the bandwidth)
 * supported input ranges and filter settings
 * whether an SD card is inserted
@@ -252,9 +252,9 @@ For more information refer to our [reference documentation](https://github.com/h
 
 Currently, the `bandwidth` and `destinations` settings on each channel must be the same.
 
-For example, it is not possible to configure channel 1 to measure at 51.2 kHz bandwidth, and channel 2 at 25.6 kHz bandwidth.
+For example, it is not possible to configure Channel 1 to measure at 51.2 kHz bandwidth, and Channel 2 at 25.6 kHz bandwidth.
 
-Similarly, all channels must be either streamed (`destinations = [ "socket" ]`) or stored on SD card (`destinations = [ "sd" ]`). Open API does not support streaming some channels while simultaneously storing other channels on SD card.
+Similarly, all channels must be either streamed (`destinations = [ "socket" ]`) or stored on an SD card (`destinations = [ "sd" ]`). Open API does not support streaming some channels while simultaneously storing other channels on an SD card.
 
 Finally, only one destination can be selected at a time. The modules are unable to both stream and store acquired data at the same time.
 
@@ -276,7 +276,7 @@ requests.put(base_url + "/reboot")
 
 HBK appreciates reports of 5xx errors, if possible with a sample program or description of events leading up to the error.
 
-Instances of 5xx errors are stored in the module's eventlog, available on the *Status* homepage. The error code and additional information stored in the log may also be helpful when diagnosing errors.
+Instances of 5xx errors are stored in the module's eventlog, available on the *Status* home page. The error code and additional information stored in the log may also be helpful when diagnosing errors.
 
 ## Licenses
 
