@@ -246,7 +246,7 @@ Most of the time the programmer won't need to worry about this, but you may run 
 
 In many cases the reason for the error is obvious, such as attempting to perform transducer detection while a measurement is in progress.
 
-For more information refer to our [reference documentation](https://github.com/hbk-world/LAN-XI-FW/blob/master/Open%20APIv17draft.pdf), which lists each API request along with the permissible module states.
+For more information refer to our [reference documentation](../doc/be187215.pdf), which lists each API request along with the permissible module states.
 
 ## Measurement Limitations
 
