@@ -18,12 +18,6 @@ The example code is written in Python.
 
 Python 3.7 or later is required, refer to the Toolbox page for [instructions on how to install Python](programmers_toolbox.md).
 
-You will also need to install a few Python packages:
-
-```shell
-$ pip3 install numpy kaitaistruct matplotlib
-```
-
 The Python code can be [downloaded from the src folder](../src/streaming_interpretation.py), and is also included below.
 
 ```python
@@ -195,6 +189,12 @@ else:
 ```
 
 ## Running the Example
+
+The code requires a few additional Python packages, so run the `pip3` package manager to install these as shown:
+
+```shell
+pip3 install numpy kaitaistruct matplotlib
+```
 
 To run the example, a file containing measurement data from a LAN-XI module is required.
 
