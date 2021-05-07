@@ -221,10 +221,10 @@ Once the setup is applied we prepare a file to store the measured data streamed 
 
 When the streaming connection is established, we start the measurement and let it run for the time specified on the command line, reading and storing the streamed data along the way.
 
-The module provides an array of `channelStatus` structures to report any errors that may occur during the measurement, including cable fault errors, analog overload, and common mode overload. Those errors are reported as one of
+The module provides an array of `channelStatus` structures to report any errors that may occur during the measurement, including cable fault errors, analog overload, and common mode overload. Those errors are reported as one of the following:
 
-* `none`, no error has occurred during the measurement, or
-* `curr`, there is currently an error, or
+* `none`, no error has occurred during the measurement
+* `curr`, there is currently an error
 * `prev`, there was an error earlier in the measurement
 
 After the measurement has stopped, we close the streaming socket and exit the recorder. The order is important here: if the streaming socket was closed before the measurement was stopped then the module would report an error due to the unavoidable loss of data. To prevent this, always stop the measurement before closing the streaming socket.
