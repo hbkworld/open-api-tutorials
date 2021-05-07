@@ -176,6 +176,12 @@ print(f'Stream saved as "{filename}"')
 
 The Python example can be [downloaded from the src folder](../src/streaming_single_module.py), or can be copied directly from this page into a new file.
 
+The code uses the Python `requests` package, so run the `pip3` package manager to add this package as shown:
+
+```shell
+pip3 install requests
+```
+
 To run the code you will need a LAN-XI module and, optionally, one or more transducers with [TEDS](https://en.wikipedia.org/wiki/IEEE_1451#Transducer_electronic_data_sheet) support.
 
 Determine the IP address of the LAN-XI module, this is shown on the display at the front of the module.
