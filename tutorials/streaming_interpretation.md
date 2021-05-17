@@ -1,10 +1,10 @@
 # Interpreting Open API Streams
 
-Open API enables clients to carry out measurements and stream acquired data back to the client in near real-time.
+Open API enables clients to carry out measurements and stream acquired data back to the client in near real time.
 
 This page is a continuation of the [Streaming with Open API](streaming_single_module.md) tutorial and explains how to process the data stream.
 
-Note that the example code shown on this page does not support CAN measurements with the 3058 module. Refer to the BE-1872 reference manual for information on how to extend the code to support CAN measurements.
+Note that the example code shown on this page does not support CAN measurements with the Type 3058 module. Refer to the BE-1872 reference manual for information on how to extend the code to support CAN measurements.
 
 You may also be interested in
 
@@ -24,7 +24,7 @@ The Python code can be [downloaded from the src folder](../src/streaming_interpr
 #!/usr/bin/env python3
 # pylint: disable=C0103
 
-"""Example code to demonstrate streaming data processing with the LAN-XI Open API."""
+"""Example code to demonstrate streamed-data processing with LAN-XI Open API."""
 
 from os import path
 from datetime import datetime, timezone
@@ -48,7 +48,7 @@ def calc_time(t):
 
 def dbfft(input_vec, fs, ref=1):
     """
-    Calculate spectrum on dB scale relative to specified reference
+    Calculate spectrum on dB scale relative to specified reference.
     Args:
         input_vec: vector containing input signal
         fs: sampling frequency
@@ -57,7 +57,7 @@ def dbfft(input_vec, fs, ref=1):
         freq_vec: frequency vector
         spec_db: spectrum in dB scale
     """
-    # Calculate windowed/scaled FFT and convert to dB relative to full-scale.
+    # Calculate windowed/scaled FFT and convert to dB relative to full-scale
     window = np.hamming(len(input_vec))
     input_vec = input_vec * window
     spec = np.fft.rfft(input_vec)
@@ -137,7 +137,7 @@ while True:
     # Print progress
     print(f'{int(100 * file_stream.tell() / file_size)}%', end="\r")
 
-# Plot time- and frequency domain data from all channels
+# Plot time- and frequency-domain data from all channels
 print(f'Plotting data...')
 
 figure, axis = plt.subplots(len(data), 2)
@@ -210,7 +210,7 @@ To run the example code, pass the path to the data file:
 $ ./streaming_interpretation.py ../data/My\ Measurement.stream
 ```
 
-The sample file contains approximately 10 seconds of data from a 4-channel 3160 module, with the input channels connected as follows:
+The sample file contains approximately 10 seconds of data from a 4-channel Type 3160 module, with the input channels connected as follows:
 
 * Channel 1: CCLD microphone mounted on calibrator
 * Channel 2: CCLD accelerometer, disconnected a couple of seconds into the measurement to simulate transducer error
@@ -221,7 +221,7 @@ Running the example against the sample file produces this output:
 
 ![Typical output from running the code sample](../images/streaming_interpretation.gif)
 
-The code also displays a plot of processed data, showing time- and frequency domain contents from each channel:
+The code also displays a plot of processed data, showing time- and frequency-domain contents from each channel:
 
 ![Typical output from running the code sample](../images/streaming_interpretation_plot.png)
 
@@ -229,8 +229,8 @@ The code also displays a plot of processed data, showing time- and frequency dom
 
 Skipping past the function definitions at the top, the example code performs two principal tasks:
 
-* reads measurement data from the file, and stores it in the `data` collection in memory
-* plots and prints information about the measurement from the contents of `data`
+* Reads measurement data from the file, and stores it in the `data` collection in memory
+* Plots and prints information about the measurement from the contents of `data`
 
 While the current implementation reads data from a file, it should be straightforward to convert the code to reading real-time data from a socket connected to a LAN-XI module, enabling live display of data.
 
@@ -244,15 +244,15 @@ There are three types of messages:
 * *Interpretation* messages, metadata that specifies how to interpret or process the contents of Signal Data messages
 * *Data Quality* messages, information about quality issues such as overload conditions, transducer faults, or gaps in data
 
-We use a [Kaitai](https://kaitai.io)-based parser to process the file - see the section below for more information on this.
+We use a parser based on [Kaitai Struct](https://kaitai.io) to process the file – see the section below for more information on this.
 
 Reading one message at a time, we add the contents to the `data` collection.
 
 The `data` collection is a dictionary keyed by *Signal ID*.
 
-**Signal ID's** are numbers that uniquely identify input channels. Analog input channels are assigned consecutive Signal ID's starting from 1, whereas CAN input channels start from 101.
+**Signal IDs** are numbers which uniquely identify input channels. Analog input channels are assigned consecutive Signal IDs starting from 1, whereas CAN input channels start from 101.
 
-Note that only enabled channels have Signal ID's associated with them. As Signal ID's are numbered consecutively this means that Signal ID's don't always map to channel numbers as seen on the module. For example, a measurement that includes channels 1, 3, and 4 will contain Signal ID's 1, 2, and 3, where Signal ID 1 corresponds to input channel 1, Signal ID 2 to input channel 3, and Signal ID 3 to input channel 4.
+Note that only enabled channels have Signal IDs associated with them. As Signal IDs are numbered consecutively this means that Signal IDs don't always map to channel numbers as seen on the module. For example, a measurement that includes channels 1, 3, and 4 will contain Signal IDs 1, 2, and 3, where Signal ID 1 corresponds to input channel 1, Signal ID 2 to input channel 3, and Signal ID 3 to input channel 4.
 
 **Interpretation messages** contain the following information:
 
@@ -292,13 +292,13 @@ As mentioned previously, the `data` collection is a dictionary keyed by Signal I
 
 We iterate through the collection, processing one signal at a time.
 
-The samples are raw, 24-bit values that must be scaled to produce meaningful results. We divide each sample by 2^23 to normalise to a range of [-1..1], and then multiply by the scale factor from the Interpretation message. The scale factor is calculated by the module and depends on the transducer sensitivity as well as the input range configured on the channel.
+The samples are raw, 24-bit values which must be scaled to produce meaningful results. We divide each sample by 2^23 to normalise to a range of [-1..1], and then multiply by the scale factor from the Interpretation message. The scale factor is calculated by the module and depends on the transducer sensitivity as well as the input range configured on the channel.
 
 An important point to note is that if the transducer sensitivity is not known to the module then the scale factor must be calculated manually. Refer to the [Toolbox page](programmers_toolbox.md) for details on this.
 
 We then calculate FFT spectra of the data, with a special case for microphones (indicated by an engineering unit of pascal).
 
-Time- and frequency domain data is then plotted on a grid.
+Time- and frequency-domain data is then plotted on a grid.
 
 Some additional information is printed to the console, including the number of samples captured, the starting time of the measurement, and any signal quality issues found.
 
