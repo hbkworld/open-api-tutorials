@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # pylint: disable=C0103
 
-"""Example code to demonstrate streaming data processing with the LAN-XI Open API."""
+"""Example code to demonstrate streamed-data processing with LAN-XI Open API."""
 
 from os import path
 from datetime import datetime, timezone
@@ -25,7 +25,7 @@ def calc_time(t):
 
 def dbfft(input_vec, fs, ref=1):
     """
-    Calculate spectrum on dB scale relative to specified reference
+    Calculate spectrum on dB scale relative to specified reference.
     Args:
         input_vec: vector containing input signal
         fs: sampling frequency
@@ -34,7 +34,7 @@ def dbfft(input_vec, fs, ref=1):
         freq_vec: frequency vector
         spec_db: spectrum in dB scale
     """
-    # Calculate windowed/scaled FFT and convert to dB relative to full-scale.
+    # Calculate windowed/scaled FFT and convert to dB relative to full-scale
     window = np.hamming(len(input_vec))
     input_vec = input_vec * window
     spec = np.fft.rfft(input_vec)
@@ -114,7 +114,7 @@ while True:
     # Print progress
     print(f'{int(100 * file_stream.tell() / file_size)}%', end="\r")
 
-# Plot time- and frequency domain data from all channels
+# Plot time- and frequency-domain data from all channels
 print(f'Plotting data...')
 
 figure, axis = plt.subplots(len(data), 2)
