@@ -11,7 +11,6 @@ Note that the example code shown on this page does not support CAN measurements 
 You may also be interested in
 
 * [Multi-Module, Sample-Synchronous Streaming with Open API](streaming_multi_module.md)
-* [Bridge Measurements with Open API](bridge_measurements.md)
 * [Open API Programmer's Toolbox](programmers_toolbox.md)
 
 # Example Code

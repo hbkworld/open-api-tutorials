@@ -54,8 +54,6 @@ Unless otherwise specified, the code samples in this repository work with all LA
 
 * [Multi-Module, Sample-Synchronous Streaming with Open API](tutorials/streaming_multi_module.md) demonstrates how to set up multiple LAN-XI modules to synchronously acquire and stream data.
 
-* [Bridge Measurements with Open API](tutorials/bridge_measurements.md) explains how to use Open API with the LAN-XI Type 3057 Bridge module.
-
 * [Open API Programmer's Toolbox](tutorials/programmers_toolbox.md) is a collection of cookbook-style code samples and snippets of information useful for working with the Open API.
 
 ## A Word on Firmware Versions

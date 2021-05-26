@@ -9,7 +9,6 @@ The follow-up article [Interpreting Data from an Open API Stream](streaming_inte
 You may also be interested in
 
 * [Streaming with Open API](streaming_single_module.md)
-* [Bridge Measurements with Open API](bridge_measurements.md)
 * [Open API Programmer's Toolbox](programmers_toolbox.md)
 
 # Example Code
