@@ -194,6 +194,10 @@ IdaArp is a custom discovery protocol that also supports other functionality suc
 
 LAN-XI currently does not support HTTPS, WebSocket or IPsec.
 
+## Wireshark Support
+
+A [Wireshark dissector for the Open API streaming protocol](https://github.com/hbk-world/LAN-XI-Open-API-Tools) is available on GitHub.
+
 ## Module Information
 
 It is often useful to query the capabilities of a module in terms of bandwidth, available channels, filters, etc.
