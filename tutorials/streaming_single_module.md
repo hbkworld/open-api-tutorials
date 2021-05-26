@@ -2,9 +2,11 @@
 
 The Open API enables clients to carry out measurements and stream acquired data back to the client in near real-time.
 
-This example demonstrates how to set up a LAN-XI module to perform a streaming measurement, storing the data to a file on the client.
+This example demonstrates how to set up a LAN-XI module to perform a streaming measurement.
 
-The follow-up article [Interpreting Data from an Open API Stream](streaming_interpretation.md) explains how to interpret the data from the stream.
+It connects to an available LAN-XI module, runs TEDS transducer detection, captures about ten seconds of data from all input channels, and stores the data to a file called `My Measurement.stream`.
+
+The follow-up article [Interpreting Data from an Open API Stream](streaming_interpretation.md) explains how to interpret the data from the `My Measurement.stream` file.
 
 You may also be interested in
 

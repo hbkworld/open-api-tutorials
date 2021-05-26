@@ -2,9 +2,9 @@
 
 This Open API tutorial demonstrates how to set up two or more LAN-XI modules to capture sample-synchronous data.
 
-The data is streamed back to the client and stored in files for post-processing.
+The example code configures PTP synchronization and then connects to two or more LAN-XI modules, runs TEDS transducer detection, captures about ten seconds of data from all input channels on all the modules, and saves the data to files named `My Measurement.<number>.stream`.
 
-A follow-up page, [Interpreting Data from an Open API Stream](streaming_interpretation.md), explains how to interpret the data from the stream.
+The follow-up article [Interpreting Data from an Open API Stream](streaming_interpretation.md) explains how to interpret the data from the `My Measurement.<number>.stream` files.
 
 You may also be interested in
 
