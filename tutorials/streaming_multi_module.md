@@ -255,7 +255,7 @@ for m in modules:
 ```
 ## Running the Example
 
-The Python source code can be [downloaded from the src folder](../src/streaming_multi_module.py), or can be copied directly from this page into a new file.
+To obtain the example code, download or clone this repository from GitHub.
 
 The code uses the Python `requests` package, so run the `pip3` package manager to add this package as shown:
 

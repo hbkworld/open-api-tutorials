@@ -190,6 +190,8 @@ else:
 
 ## Running the Example
 
+To obtain the example code, download or clone this repository from GitHub.
+
 The code requires a few additional Python packages, so run the `pip3` package manager to install these as shown:
 
 ```shell
