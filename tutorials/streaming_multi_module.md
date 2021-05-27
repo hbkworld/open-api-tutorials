@@ -2,7 +2,7 @@
 
 This Open API tutorial demonstrates how to set up two or more LAN-XI modules to capture sample-synchronous data.
 
-The example code configures PTP synchronization and then connects to two or more LAN-XI modules, runs TEDS transducer detection, captures about ten seconds of data from all input channels on all the modules, and saves the data to files named `My Measurement.<number>.stream`.
+The example code configures PTP (Precision Time Protocol) synchronization and then connects to two or more LAN-XI modules, runs TEDS transducer detection, captures about ten seconds of data from all input channels on all the modules, and saves the data to files named `My Measurement.<number>.stream`.
 
 The follow-up article [Interpreting Data from an Open API Stream](streaming_interpretation.md) explains how to interpret the data from the `My Measurement.<number>.stream` files.
 
@@ -237,7 +237,7 @@ for m in modules:
 
 print("Measurement stopped")
 
-# Close the streaming connections, data files, and recorder instances on eacn module
+# Close the streaming connections, data files, and recorder instances on each module
 for m in modules:
     m["stream_sock"].close()
     m["stream_file"].close()
@@ -264,7 +264,7 @@ pip3 install requests
 
 To run the code you will need at least two LAN-XI modules and, optionally, one or more transducers with [TEDS](https://en.wikipedia.org/wiki/IEEE_1451#Transducer_electronic_data_sheet) support.
 
-Note that LAN-XI module types 3676 and 3677 do not support the Precision Time Protocol required for synchronization, and thus will not work with this tutorial.
+Note that LAN-XI Modules Type 3676 and 3677 do not support the Precision Time Protocol required for synchronization, and thus will not work with this tutorial.
 
 Determine the IP address of each LAN-XI module, this is shown on the display at the front of the module.
 
@@ -289,7 +289,7 @@ LAN-XI uses the [Precision Time Protocol (PTP)](https://en.wikipedia.org/wiki/Pr
 
 The example code accepts a list of IP addresses, one for each LAN-XI module to include in the measurement. The module whose IP address is listed first will become the *PTP master*; all other modules will follow the clock reference provided by the master.
 
-In cases where multiple PTP systems are active on the same network care must be taken to ensure they do not interfere with each other. The [PTP Domain Number](https://en.wikipedia.org/wiki/Precision_Time_Protocol#Domains) provides a way to organise modules into groups that synchronize with a particular master. It's a number in the range of 4 to 127 inclusive, usually administered within your organisation.
+In cases where multiple PTP systems are active on the same network care must be taken to ensure they do not interfere with each other. The [PTP Domain Number](https://en.wikipedia.org/wiki/Precision_Time_Protocol#Domains) provides a way to organize modules into groups that synchronize with a particular master. It's a number in the range of 4 to 127 inclusive, usually administered within your organisation.
 
 If you know there is no other PTP activity on the network then you won't have to do anything; the example code will simply use a default, hard-coded PTP Domain Number. Otherwise, you may need to request a PTP Domain Number from your network administrator and pass this to the example code by means of the `-d` command line option.
 
@@ -307,7 +307,7 @@ Multi-module setup is inherently more complicated than single-module configurati
 
 For instance, the synchronization parameters must be sent to the PTP master first, followed by all the other modules. Also, synchronization must be configured before the Open API instance on each module is opened, i.e. before `PUT /open`.
 
-After we've sent the synchronization parameters, we also need to wait for all modules to lock on to the master clock. The time that this takes varies a bit but is generally on the order of 1-2 minutes. The PTP status can be queried from each module, so in this case we use the convenience function `await_state` to wait for all the modules to enter a `ptpStatus` of `Locked`.
+After we've sent the synchronization parameters, we also need to wait for all modules to lock on to the master clock. The time that this takes varies a bit but is generally 1-2 minutes. The PTP status can be queried from each module, so in this case we use the convenience function `await_state` to wait for all the modules to enter a `ptpStatus` of `Locked`.
 
 The remaining requests sent by the example code must be issued in the reverse order, i.e. the PTP master must be the last module to receive each request, so we reverse the list of modules to make it easier to meet that requirement.
 
@@ -333,7 +333,7 @@ LAN-XI frames also provide the ability to use GPS as a synchronization source.
 
 For a full overview of synchronization options refer to the [LAN-XI Product Data](https://www.bksv.com/-/media/literature/Product-Data/bp2215.ashx) documentation.
 
-(*) With the exception of types 3676 and 3677, as noted earlier
+(*) With the exception of LAN-XI Modules Type 3676 and 3677, as noted earlier
 
 # Multi-Socket Streaming
 
@@ -346,5 +346,5 @@ This may be useful e.g. to stream 'monitor' channels directly to a software appl
 To configure modules to use multi-socket streaming, change the example code as follows:
 
 * Set the `destination` on all enabled channels to `multi-socket`
-* Make a `GET` request to `/rest/rec/destination/sockets`to obtain a list of TCP port numbers to connect to. The response will be a JSON array of port numbers. The first port number in the array will contain data from the first enabled channel, and so on
+* Make a `GET` request to `/rest/rec/destination/sockets` to obtain a list of TCP port numbers to connect to. The response will be a JSON array of port numbers. The first port number in the array will contain data from the first enabled channel, and so on
 * Set up connections to each TCP port before starting the measurement
