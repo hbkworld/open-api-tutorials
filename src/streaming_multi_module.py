@@ -217,7 +217,7 @@ for m in modules:
 
 print("Measurement stopped")
 
-# Close the streaming connections, data files, and recorder instances on eacn module
+# Close the streaming connections, data files, and recorder instances on each module
 for m in modules:
     m["stream_sock"].close()
     m["stream_file"].close()
