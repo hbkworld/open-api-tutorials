@@ -99,9 +99,7 @@ Blue | The channel is an output or generator channel
 
 ## IPv6
 
-Open API supports IPv6 for the HTTP-based protocol, but not for streaming at the time of writing.
-
-IPv6 will be supported in a future firmware release, and the code samples in this repository will work with IPv6 without any modifications.
+Starting from [firmware 2.10.0.501](https://bksv.com/lanxi-firmware), Open API supports IPv6 for both HTTP and streaming (note that PTP is still limited to IPv4).
 
 The module's IPv6 addresses are shown on the module's home page; click *Network* and look under the *IPv6* heading.
 
@@ -116,7 +114,7 @@ For instance, running the streaming sample on a Linux PC, and using the `wlp82s0
 $ ./streaming_single_module.py fe80::280:daff:fe00:8db0%wlp82s0
 ```
 
-Note that on Microsoft Windows, `%` is a special character and requires escaping by an additional `%`. Example:
+On Microsoft Windows, `%` is a special character and requires escaping by an additional `%`. Example:
 
 ```shell
 # Windows
