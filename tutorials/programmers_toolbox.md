@@ -66,7 +66,7 @@ transducers = requests.get(base_url + "/channels/input/all/transducers").json()
 
 The returned result of the detection includes the fields `requiresCcld` and `requires200V`, which can be used to configure the front end e.g. to enable the [CCLD](https://www.bksv.com/en/transducers/signal-conditioning/ccld) supply.
 
-However, be aware that those values, while accurate in most cases, are nothing more than best guesses. They are based on a transducer database embedded in the module firmware, combined with heuristics to determine the requirements of the transducer in question; in other words, they are merely suggestions and should be overridden by the end user if needed.
+Be aware though that the `requiresCcld` value, while accurate in most cases, is only an educated guess. TEDS transducers do not store this information, so the `requiresCcld` value is generated on a transducer database embedded in the module firmware, combined with heuristics to determine the requirements of the transducer.
 
 Also note that the use of polarisation voltage requires a front panel with LEMO connectors such as [Front Panel UA-2101](https://www.bksv.com/en/instruments/daq-data-acquisition/lan-xi-daq-system/frontpanels/ua-2101).
 
