@@ -323,17 +323,17 @@ Proceed with [Interpreting Data from an Open API Stream](streaming_interpretatio
 
 # Frame Sync
 
-All LAN-XI modules(*) can be configured to use PTP synchronization, irrespective of whether they are stand-alone modules or are mounted in a LAN-XI frame.
-
-However, modules mounted in a frame will always override any synchronization parameters and instead use a synchronization mechanism internal to the frame, commonly referred to as *frame sync*. This happens transparently and client software does not need to treat frame-mounted modules any different than stand-alone modules.
+Modules mounted in a frame use a synchronization mechanism internal to the frame, commonly referred to as *frame sync*.
 
 Frame sync is based on a dedicated sync line and is more accurate than PTP. The module acting as the *frame controller* (the module situated in the left-most slot of the frame) manages the sync line for all other modules in the frame. Simultaneously, frame controllers can act as PTP masters for other frames and stand-alone modules on the network, or they can lock on to another PTP master on the network.
 
-LAN-XI frames also provide the ability to use GPS as a synchronization source.
+In the simplest case - using a single LAN-XI frame containing one or more modules - set the `mode` argument to `stand-alone` in the `PUT /syncmode` request. This will configure the modules inside the frame to use frame sync.
+
+Other options, beyond the scope of this tutorial, include synchronizing multiple LAN-XI frames using the PTP protocol, or synchronizing one or more frames against an external PTP master.
+
+Frames also provide the ability to use GPS as a synchronization source.
 
 For a full overview of synchronization options refer to the [LAN-XI Product Data](https://www.bksv.com/-/media/literature/Product-Data/bp2215.ashx) documentation.
-
-(*) With the exception of LAN-XI Modules Type 3676 and 3677, as noted earlier
 
 # Multi-Socket Streaming
 
